@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ds-auth"
+version = "0.1.0"
+description = "Standard authentication + authorization middleware for Hiro dataspace services (RBAC, JWT, policy engine)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Hiro MicroDataCenters", email = "dataspaces@hiro-microdatacenters.nl" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: FastAPI",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "fastapi>=0.100",
+    "httpx>=0.25",
+    "pyjwt[crypto]>=2.8",
+    "starlette>=0.27",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7",
+    "pytest-asyncio>=0.21",
+    "respx>=0.20",       # mock httpx in tests
+    "ruff>=0.1",
+    "mypy>=1.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/HIRO-MicroDataCenters-BV/ds-auth"
+Repository = "https://github.com/HIRO-MicroDataCenters-BV/ds-auth"
+
+[tool.setuptools.packages.find]
+include = ["ds_auth*"]
+exclude = ["tests*", "examples*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
