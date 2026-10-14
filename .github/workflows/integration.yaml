@@ -33,7 +33,7 @@ jobs:
       - name: Pre-pull registry images
         run: |
           docker pull openpolicyagent/opa:latest
-          docker pull ghcr.io/hiro-microdatacenters-bv/ds-policy-engine:latest
+          docker pull ghcr.io/hiro-microdatacenters-bv/ds-policy-engine:0.1.0-dev.35.develop.04feb982
 
       - name: Build local images + bring stack up
         working-directory: tests/integration

@@ -11,7 +11,6 @@ from fastapi import FastAPI, Header
 
 from ds_auth import DataspaceAuthMiddleware
 
-
 app = FastAPI(title="test-service", version="0.0.1")
 
 

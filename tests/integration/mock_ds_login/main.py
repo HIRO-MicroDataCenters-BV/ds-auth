@@ -9,7 +9,6 @@ For tests only. Not a replacement for ds-login in any other context.
 from __future__ import annotations
 
 import base64
-import json
 import time
 import uuid
 
@@ -18,7 +17,6 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-
 
 # Hardcoded test identities — the role/institute drives the policy decision
 TEST_USERS: dict[str, dict[str, str]] = {

@@ -4,15 +4,15 @@ from __future__ import annotations
 import os
 import subprocess
 import time
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 
 import httpx
 import pytest
 
-
 COMPOSE_DIR = Path(__file__).parent
-POLICY_URL = "http://localhost:8000"  # overridden by env if the suite runs inside a container
+# Host-mapped ports (see docker-compose.yml); each service also has an in-cluster hostname
+POLICY_URL = "http://localhost:18000"
 LOGIN_URL = "http://localhost:18080"
 SERVICE_URL = "http://localhost:19100"
 
@@ -38,8 +38,8 @@ def _wait_for(url: str, timeout_s: int = 90, interval_s: float = 1.0) -> None:
             r = httpx.get(url, timeout=3.0)
             if 200 <= r.status_code < 300:
                 return
-            last_err = Exception(f"HTTP {r.status_code}")
-        except Exception as e:
+            last_err = RuntimeError(f"HTTP {r.status_code}")
+        except (httpx.HTTPError, OSError) as e:
             last_err = e
         time.sleep(interval_s)
     raise RuntimeError(f"Timed out waiting for {url}: {last_err}")

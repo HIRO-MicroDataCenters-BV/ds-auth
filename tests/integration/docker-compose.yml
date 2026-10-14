@@ -26,8 +26,13 @@ services:
       start_period: 3s
 
   ds-policy-engine:
-    image: ghcr.io/hiro-microdatacenters-bv/ds-policy-engine:latest
+    # HIRO doesn't publish a 'latest' tag — pin to a known-good develop build.
+    # Bump by: curl -s https://ghcr.io/token?scope=repository:hiro-microdatacenters-bv/ds-policy-engine:pull
+    #   -> use the token to list /v2/.../tags/list; pick newest develop tag.
+    # Note: the published image doesn't set a CMD — we provide uvicorn here.
+    image: ghcr.io/hiro-microdatacenters-bv/ds-policy-engine:0.1.0-dev.35.develop.04feb982
     container_name: ds-auth-it-policy-engine
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
     depends_on:
       ds-opa:
         condition: service_healthy
@@ -39,6 +44,8 @@ services:
       DS__NODE_NAME: it
       DS__LOG_LEVEL: WARNING
       DS__CORS_ALLOWED_ORIGINS: "http://localhost"
+    ports:
+      - "127.0.0.1:18000:8000"   # expose for the test harness
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8000/health').read()\" || exit 1"]
       interval: 5s

@@ -7,7 +7,6 @@ for the per-request decision.
 """
 import httpx
 
-
 SERVICE_URL = "http://localhost:19100"
 
 
