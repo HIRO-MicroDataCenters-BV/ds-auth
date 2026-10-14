@@ -1,20 +1,18 @@
 """Integration-style tests for DataspaceAuthMiddleware against a FastAPI app
 with a mocked JWKs endpoint and a mocked policy engine."""
-import json
 import time
 import uuid
 
-import pytest
-import respx
 import httpx
 import jwt as pyjwt
-from cryptography.hazmat.primitives.asymmetric import rsa
+import pytest
+import respx
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import FastAPI, Header
 from fastapi.testclient import TestClient
 
 from ds_auth import DataspaceAuthMiddleware
-
 
 # ──────── Test fixtures ────────
 

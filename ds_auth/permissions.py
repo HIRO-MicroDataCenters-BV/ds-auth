@@ -7,8 +7,8 @@ extract them separately).
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 
 @dataclass(frozen=True)
@@ -20,7 +20,7 @@ class PermissionRule:
     permission: str
 
     @classmethod
-    def make(cls, method: str, pattern: str, permission: str) -> "PermissionRule":
+    def make(cls, method: str, pattern: str, permission: str) -> PermissionRule:
         return cls(method.upper(), re.compile(pattern), permission)
 
 

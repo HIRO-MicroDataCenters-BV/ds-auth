@@ -31,25 +31,25 @@ The middleware:
 ACDC credential verification is a login-time concern handled by the verify
 service — the claims it produces are carried in the JWT and consumed here.
 """
-from .middleware import DataspaceAuthMiddleware
-from .permissions import PermissionRule, PermissionMap
 from .exceptions import (
     AuthError,
-    MissingTokenError,
     InvalidTokenError,
+    MissingTokenError,
     PolicyDeniedError,
     PolicyEngineUnavailableError,
 )
+from .middleware import DataspaceAuthMiddleware
+from .permissions import PermissionMap, PermissionRule
 
 __version__ = "0.1.0"
 
 __all__ = [
-    "DataspaceAuthMiddleware",
-    "PermissionRule",
-    "PermissionMap",
     "AuthError",
-    "MissingTokenError",
+    "DataspaceAuthMiddleware",
     "InvalidTokenError",
+    "MissingTokenError",
+    "PermissionMap",
+    "PermissionRule",
     "PolicyDeniedError",
     "PolicyEngineUnavailableError",
     "__version__",

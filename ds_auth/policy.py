@@ -9,7 +9,6 @@ import httpx
 
 from .exceptions import PolicyEngineUnavailableError
 
-
 POLICY_EVALUATE_PATH = "/api/v1/policies/evaluate"
 
 

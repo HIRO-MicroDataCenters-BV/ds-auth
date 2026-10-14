@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -20,7 +21,6 @@ from .exceptions import (
 from .jwks import JwksClient, JwtVerifier
 from .permissions import PermissionMap, PermissionRule
 from .policy import PolicyClient
-
 
 logger = logging.getLogger("ds_auth")
 

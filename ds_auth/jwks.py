@@ -12,7 +12,6 @@ from jwt.algorithms import RSAAlgorithm
 
 from .exceptions import InvalidTokenError
 
-
 DEFAULT_CACHE_TTL = 300  # 5 minutes — matches byok-verify's typical signing-key stability
 
 
