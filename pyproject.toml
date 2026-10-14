@@ -51,4 +51,7 @@ target-version = "py311"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+# Default run excludes the integration suite, which needs docker-compose.
+# Run integration explicitly with: pytest tests/integration -v
 testpaths = ["tests"]
+norecursedirs = ["tests/integration"]
