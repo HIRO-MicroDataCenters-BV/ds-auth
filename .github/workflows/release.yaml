@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'          # v0.1.0, v1.2.3
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'        # v0.1.0-rc1
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v0.1.0)'
+        required: true
+
+permissions:
+  contents: write      # for creating the GitHub Release
+  packages: write      # for publishing the Python package to GHCR
+  id-token: write      # for OIDC-based PyPI trusted publishing (if configured)
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # for release notes
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install build backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Build wheel + sdist
+        run: python -m build
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          if [ -z "$TAG" ] || [ "$TAG" = "$GITHUB_REF" ]; then
+            TAG="${{ inputs.tag }}"
+          fi
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --generate-notes \
+            dist/*
+
+      # Optional: publish to PyPI (requires PYPI_API_TOKEN secret or trusted publishing config)
+      # Uncomment when the project is ready to publish externally.
+      # - name: Publish to PyPI
+      #   if: ${{ secrets.PYPI_API_TOKEN != '' }}
+      #   env:
+      #     TWINE_USERNAME: __token__
+      #     TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      #   run: |
+      #     pip install twine
+      #     twine upload dist/*
