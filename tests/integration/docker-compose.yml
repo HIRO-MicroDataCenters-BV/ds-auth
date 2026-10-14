@@ -1,0 +1,79 @@
+name: ds-auth-integration
+
+# ds-opa and ds-policy-engine are the real services, pulled from GHCR.
+# mock-ds-login and test-service are built from this repo.
+#
+# Build contexts for the two local services point at the repo ROOT so each
+# Dockerfile can pull in the ds_auth source (needed for test-service to
+# pip-install ds-auth from the working tree being tested).
+
+services:
+  ds-opa:
+    image: openpolicyagent/opa:latest
+    container_name: ds-auth-it-opa
+    command:
+      - "run"
+      - "--server"
+      - "--addr"
+      - "0.0.0.0:8181"
+      - "--log-level"
+      - "error"
+    healthcheck:
+      test: ["CMD", "/opa", "eval", "true"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 3s
+
+  ds-policy-engine:
+    # HIRO doesn't publish a 'latest' tag — pin to a known-good develop build.
+    # Bump by: curl -s https://ghcr.io/token?scope=repository:hiro-microdatacenters-bv/ds-policy-engine:pull
+    #   -> use the token to list /v2/.../tags/list; pick newest develop tag.
+    # Note: the published image doesn't set a CMD — we provide uvicorn here.
+    image: ghcr.io/hiro-microdatacenters-bv/ds-policy-engine:0.1.0-dev.35.develop.04feb982
+    container_name: ds-auth-it-policy-engine
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    depends_on:
+      ds-opa:
+        condition: service_healthy
+    environment:
+      DS__OPA_BASE_URL: http://ds-opa:8181
+      DS__OPA_TIMEOUT: "3.0"
+      DS__OPA_POLICY_PATH: ds/authz/decision
+      DS__DATABASE_URL: sqlite+aiosqlite:////tmp/policy_engine.db
+      DS__NODE_NAME: it
+      DS__LOG_LEVEL: WARNING
+      DS__CORS_ALLOWED_ORIGINS: "http://localhost"
+    ports:
+      - "127.0.0.1:18000:8000"   # expose for the test harness
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request as u; u.urlopen('http://localhost:8000/health').read()\" || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  mock-ds-login:
+    build:
+      context: ./mock_ds_login
+    container_name: ds-auth-it-mock-ds-login
+    ports:
+      - "127.0.0.1:18080:8080"   # expose for the test harness
+
+  test-service:
+    build:
+      context: ../..                      # repo root — gives Dockerfile access to ds_auth/
+      dockerfile: tests/integration/test_service/Dockerfile
+    container_name: ds-auth-it-test-service
+    depends_on:
+      ds-policy-engine:
+        condition: service_healthy
+      mock-ds-login:
+        condition: service_started
+    environment:
+      HIRO_JWKS_URL: http://mock-ds-login:8080/.well-known/jwks.json
+      HIRO_POLICY_URL: http://ds-policy-engine:8000
+      HIRO_JWT_ISSUER: ds-login
+      HIRO_JWT_AUDIENCE: hiro-services
+    ports:
+      - "127.0.0.1:19100:9100"   # expose for the test harness
